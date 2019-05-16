@@ -170,16 +170,20 @@ which should be treated by all nodes.
 		};
 
 		Node currentNode = firstNode_;
+		String textAccept = "' accepts broadcase packet.\n";
+		String textPass = "' passes packet on.\n";
 		Packet packet = new Packet("BROADCAST", firstNode_.name_, firstNode_.name_);
 		do {
 			try {
-				report.write("\tNode '");
-				report.write(currentNode.name_);
-				report.write("' accepts broadcase packet.\n");
-				report.write("\tNode '");
-				report.write(currentNode.name_);
-				report.write("' passes packet on.\n");
-				report.flush();
+//				report.write("\tNode '");
+//				report.write(currentNode.name_);
+//				report.write("' accepts broadcase packet.\n");
+//				report.write("\tNode '");
+				logging(currentNode,textAccept,report);
+//				report.write(currentNode.name_);
+//				report.write("' passes packet on.\n");
+//				report.flush();
+				logging(currentNode,textPass,report);
 			} catch (IOException exc) {
 				// just ignore
 			};
@@ -194,6 +198,13 @@ which should be treated by all nodes.
 		return true;
 	}    
 
+	private void logging (Node node, String text, Writer report) throws IOException{
+		report.write("\tNode '");
+		report.write(node.name_);
+		report.write(text);
+		report.flush();
+	}
+	
 	/**
 The #receiver is requested by #workstation to print #document on #printer.
 Therefore #receiver sends a packet across the token ring network, until either
@@ -223,15 +234,17 @@ Therefore #receiver sends a packet across the token ring network, until either
 
 		boolean result = false;
 		Node startNode, currentNode;
+		String textPass = "' passes packet on.\n";
 		Packet packet = new Packet(document, workstation, printer);
 
 		startNode = (Node) workstations_.get(workstation);
 
 		try {
-			report.write("\tNode '");
-			report.write(startNode.name_);
-			report.write("' passes packet on.\n");
-			report.flush();
+//			report.write("\tNode '");
+//			report.write(startNode.name_);
+//			report.write("' passes packet on.\n");
+//			report.flush();
+			logging(startNode,textPass,report);
 		} catch (IOException exc) {
 			// just ignore
 		};
@@ -239,10 +252,11 @@ Therefore #receiver sends a packet across the token ring network, until either
 		while ((! packet.destination_.equals(currentNode.name_))
 				& (! packet.origin_.equals(currentNode.name_))) {
 			try {
-				report.write("\tNode '");
-				report.write(currentNode.name_);
-				report.write("' passes packet on.\n");
-				report.flush();
+//				report.write("\tNode '");
+//				report.write(currentNode.name_);
+//				report.write("' passes packet on.\n");
+//				report.flush();
+				logging(currentNode,textPass,report);
 			} catch (IOException exc) {
 				// just ignore
 			};
