@@ -46,7 +46,7 @@ public class Node {
 	/**
     Holds the type of the Node.
 	 */
-	public byte type_;
+//	public byte type_;
 	/**
     Holds the name of the Node.
 	 */
@@ -61,9 +61,7 @@ public class Node {
 Construct a <em>Node</em> with given #type and #name.
 <p><strong>Precondition:</strong> (type >= NODE) & (type <= PRINTER);</p>
 	 */
-	public Node(byte type, String name) {
-		assert (type >= NODE) & (type <= PRINTER);
-		type_ = type;
+	public Node(String name) {
 		name_ = name;
 		nextNode_ = null;
 	}
@@ -72,9 +70,7 @@ Construct a <em>Node</em> with given #type and #name.
 Construct a <em>Node</em> with given #type and #name, and which is linked to #nextNode.
 <p><strong>Precondition:</strong> (type >= NODE) & (type <= PRINTER);</p>
 	 */
-	public Node(byte type, String name, Node nextNode) {
-		assert (type >= NODE) & (type <= PRINTER);
-		type_ = type;
+	public Node(String name, Node nextNode) {
 		name_ = name;
 		nextNode_ = nextNode;
 	}
@@ -95,7 +91,7 @@ Construct a <em>Node</em> with given #type and #name, and which is linked to #ne
 		String title = "Untitled";
 		int startPos = 0, endPos = 0;
 
-		if (this.type_ == Node.PRINTER) {
+		if (this instanceof Printer) {
 			if (document.message_.startsWith("!PS")) {
 				startPos = document.message_.indexOf("author:");
 				if (startPos >= 0) {
@@ -143,34 +139,9 @@ Construct a <em>Node</em> with given #type and #name, and which is linked to #ne
 	}
 	
 	public void writeBuf(StringBuffer buf, String[] text){
-		switch (this.type_) {
-		case Node.NODE:
-			buf.append(text[0]);
-			buf.append(this.name_);
-			buf.append(text[1]);
-			break;
-		case Node.WORKSTATION:
-			buf.append(text[2]);
-			buf.append(this.name_);
-			buf.append(text[3]);
-			break;
-		case Node.PRINTER:
-			buf.append(text[4]);
-			buf.append(this.name_);
-			buf.append(text[5]);
-			break;
-		default:
-			buf.append(text[6]);;
-			break;
-		};
-	}
-	
-	public class Printer{
-		
-	}
-	
-	public class Workstation{
-		
+		buf.append(text[0]);
+		buf.append(this.name_);
+		buf.append(text[1]);
 	}
 
 }
