@@ -151,17 +151,6 @@ A consistent token ring network
 		if (workstationsFound != workstations_.size()) {return false;}; //not all workstations are registered
 		//all verifications succeedeed
 		return true;}
-
-	private void logging(Node node, String cadena, Writer report){
-		try {
-			report.write("\tNode '");
-			report.write(node.name_);
-			report.write(cadena);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	/**
 The #receiver is requested to broadcast a message to all nodes.
@@ -186,8 +175,8 @@ which should be treated by all nodes.
 		Packet packet = new Packet("BROADCAST", firstNode_.name_, firstNode_.name_);
 		do {
 			try {
-				logging(currentNode,cadena,report);
-				logging(currentNode,cadena2,report);
+				currentNode.logging(cadena,report);
+				currentNode.logging(cadena2,report);
 //				report.write("\tNode '");
 //				report.write(currentNode.name_);
 //				report.write("' accepts broadcase packet.\n");
@@ -244,7 +233,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 		startNode = (Node) workstations_.get(workstation);
 
 		try {
-			logging(startNode,cadena,report);
+			startNode.logging(cadena,report);
 //			report.write("\tNode '");
 //			report.write(startNode.name_);
 //			report.write("' passes packet on.\n");
@@ -256,7 +245,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 		while ((! packet.destination_.equals(currentNode.name_))
 				& (! packet.origin_.equals(currentNode.name_))) {
 			try {
-				logging(currentNode,cadena,report);
+				currentNode.logging(cadena,report);
 //				report.write("\tNode '");
 //				report.write(currentNode.name_);
 //				report.write("' passes packet on.\n");
