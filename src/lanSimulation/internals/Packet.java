@@ -53,5 +53,10 @@ Construct a <em>Packet</em> with given #message, #origin and #receiver.
 		origin_ = origin;
 		destination_ = destination;
 	}
+	
+	
+	public boolean atDestination(Node node){
+		return destination_.equals(node.name_);
+	}
 
 }
