@@ -164,5 +164,13 @@ Construct a <em>Node</em> with given #type and #name, and which is linked to #ne
 			break;
 		};
 	}
+	
+	public class Printer{
+		
+	}
+	
+	public class Workstation{
+		
+	}
 
 }
