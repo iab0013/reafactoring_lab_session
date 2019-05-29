@@ -152,6 +152,17 @@ A consistent token ring network
 		//all verifications succeedeed
 		return true;}
 
+	private void logging(Node node, String cadena, Writer report){
+		try {
+			report.write("\tNode '");
+			report.write(node.name_);
+			report.write(cadena);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 The #receiver is requested to broadcast a message to all nodes.
 Therefore #receiver sends a special broadcast packet across the token ring network,
@@ -162,6 +173,8 @@ which should be treated by all nodes.
 	 */
 	public boolean requestBroadcast(Writer report) {
 		assert consistentNetwork();
+		String cadena = "' accepts broadcase packet.\n";
+		String cadena2 = "' passes packet on.\n";
 
 		try {
 			report.write("Broadcast Request\n");
@@ -170,20 +183,18 @@ which should be treated by all nodes.
 		};
 
 		Node currentNode = firstNode_;
-		String textAccept = "' accepts broadcase packet.\n";
-		String textPass = "' passes packet on.\n";
 		Packet packet = new Packet("BROADCAST", firstNode_.name_, firstNode_.name_);
 		do {
 			try {
+				logging(currentNode,cadena,report);
+				logging(currentNode,cadena2,report);
 //				report.write("\tNode '");
 //				report.write(currentNode.name_);
 //				report.write("' accepts broadcase packet.\n");
 //				report.write("\tNode '");
-				logging(currentNode,textAccept,report);
 //				report.write(currentNode.name_);
 //				report.write("' passes packet on.\n");
-//				report.flush();
-				logging(currentNode,textPass,report);
+				report.flush();
 			} catch (IOException exc) {
 				// just ignore
 			};
@@ -198,13 +209,6 @@ which should be treated by all nodes.
 		return true;
 	}    
 
-	private void logging (Node node, String text, Writer report) throws IOException{
-		report.write("\tNode '");
-		report.write(node.name_);
-		report.write(text);
-		report.flush();
-	}
-	
 	/**
 The #receiver is requested by #workstation to print #document on #printer.
 Therefore #receiver sends a packet across the token ring network, until either
@@ -219,6 +223,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 	public boolean requestWorkstationPrintsDocument(String workstation, String document,
 			String printer, Writer report) {
 		assert consistentNetwork() & hasWorkstation(workstation);
+		String cadena = "' passes packet on.\n";
 
 		try {
 			report.write("'");
@@ -234,17 +239,16 @@ Therefore #receiver sends a packet across the token ring network, until either
 
 		boolean result = false;
 		Node startNode, currentNode;
-		String textPass = "' passes packet on.\n";
 		Packet packet = new Packet(document, workstation, printer);
 
 		startNode = (Node) workstations_.get(workstation);
 
 		try {
+			logging(startNode,cadena,report);
 //			report.write("\tNode '");
 //			report.write(startNode.name_);
 //			report.write("' passes packet on.\n");
-//			report.flush();
-			logging(startNode,textPass,report);
+			report.flush();
 		} catch (IOException exc) {
 			// just ignore
 		};
@@ -252,11 +256,11 @@ Therefore #receiver sends a packet across the token ring network, until either
 		while ((! packet.destination_.equals(currentNode.name_))
 				& (! packet.origin_.equals(currentNode.name_))) {
 			try {
+				logging(currentNode,cadena,report);
 //				report.write("\tNode '");
 //				report.write(currentNode.name_);
 //				report.write("' passes packet on.\n");
-//				report.flush();
-				logging(currentNode,textPass,report);
+				report.flush();
 			} catch (IOException exc) {
 				// just ignore
 			};
@@ -295,6 +299,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 						endPos = document.message_.indexOf(".", startPos + 6);
 						if (endPos < 0) {endPos = document.message_.length();};
 						title = document.message_.substring(startPos + 6, endPos);};
+						accounting(author,title,report);
 						try {
 							report.write(">>> Postscript job delivered.\n\n");
 							report.flush();
@@ -307,6 +312,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 				title = "ASCII DOCUMENT";
 				if (document.message_.length() >= 16) {
 					author = document.message_.substring(8, 16);};
+					accounting(author,title,report);
 					try {
 						report.write(">>> ASCII Print job delivered.\n\n");
 						report.flush();
@@ -328,6 +334,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 		}
 	}
 	
+	private void accounting(String author, String title, Writer report){
 		try {
 			report.write("\tAccounting -- author = '");
 			report.write(author);
@@ -351,6 +358,29 @@ Return a printable representation of #receiver.
 		return buf.toString();
 	}
 
+	private void writeBuf(Node node, StringBuffer buf, String[] text){
+		switch (node.type_) {
+		case Node.NODE:
+			buf.append(text[0]);
+			buf.append(node.name_);
+			buf.append(text[1]);
+			break;
+		case Node.WORKSTATION:
+			buf.append(text[2]);
+			buf.append(node.name_);
+			buf.append(text[3]);
+			break;
+		case Node.PRINTER:
+			buf.append(text[4]);
+			buf.append(node.name_);
+			buf.append(text[5]);
+			break;
+		default:
+			buf.append(text[6]);;
+			break;
+		};
+	}
+	
 	/**
 Write a printable representation of #receiver on the given #buf.
 <p><strong>Precondition:</strong> isInitialized();</p>
@@ -358,27 +388,29 @@ Write a printable representation of #receiver on the given #buf.
 	public void printOn (StringBuffer buf) {
 		assert isInitialized();
 		Node currentNode = firstNode_;
+		String[] text = {"Node "," [Node]","Workstation "," [Workstation]","Printer "," [Printer]","(Unexpected)"};
 		do {
-			switch (currentNode.type_) {
-			case Node.NODE:
-				buf.append("Node ");
-				buf.append(currentNode.name_);
-				buf.append(" [Node]");
-				break;
-			case Node.WORKSTATION:
-				buf.append("Workstation ");
-				buf.append(currentNode.name_);
-				buf.append(" [Workstation]");
-				break;
-			case Node.PRINTER:
-				buf.append("Printer ");
-				buf.append(currentNode.name_);
-				buf.append(" [Printer]");
-				break;
-			default:
-				buf.append("(Unexpected)");;
-				break;
-			};
+			writeBuf(currentNode,buf,text);
+//			switch (currentNode.type_) {
+//			case Node.NODE:
+//				buf.append("Node ");
+//				buf.append(currentNode.name_);
+//				buf.append(" [Node]");
+//				break;
+//			case Node.WORKSTATION:
+//				buf.append("Workstation ");
+//				buf.append(currentNode.name_);
+//				buf.append(" [Workstation]");
+//				break;
+//			case Node.PRINTER:
+//				buf.append("Printer ");
+//				buf.append(currentNode.name_);
+//				buf.append(" [Printer]");
+//				break;
+//			default:
+//				buf.append("(Unexpected)");;
+//				break;
+//			};
 			buf.append(" -> ");
 			currentNode = currentNode.nextNode_;
 		} while (currentNode != firstNode_);
@@ -395,28 +427,30 @@ Write a HTML representation of #receiver on the given #buf.
 		buf.append("<HTML>\n<HEAD>\n<TITLE>LAN Simulation</TITLE>\n</HEAD>\n<BODY>\n<H1>LAN SIMULATION</H1>");
 		Node currentNode = firstNode_;
 		buf.append("\n\n<UL>");
+		String[] text = {"Node "," [Node]","Workstation "," [Workstation]","Printer "," [Printer]","(Unexpected)"};
 		do {
 			buf.append("\n\t<LI> ");
-			switch (currentNode.type_) {
-			case Node.NODE:
-				buf.append("Node ");
-				buf.append(currentNode.name_);
-				buf.append(" [Node]");
-				break;
-			case Node.WORKSTATION:
-				buf.append("Workstation ");
-				buf.append(currentNode.name_);
-				buf.append(" [Workstation]");
-				break;
-			case Node.PRINTER:
-				buf.append("Printer ");
-				buf.append(currentNode.name_);
-				buf.append(" [Printer]");
-				break;
-			default:
-				buf.append("(Unexpected)");;
-				break;
-			};
+			writeBuf(currentNode,buf,text);
+//			switch (currentNode.type_) {
+//			case Node.NODE:
+//				buf.append("Node ");
+//				buf.append(currentNode.name_);
+//				buf.append(" [Node]");
+//				break;
+//			case Node.WORKSTATION:
+//				buf.append("Workstation ");
+//				buf.append(currentNode.name_);
+//				buf.append(" [Workstation]");
+//				break;
+//			case Node.PRINTER:
+//				buf.append("Printer ");
+//				buf.append(currentNode.name_);
+//				buf.append(" [Printer]");
+//				break;
+//			default:
+//				buf.append("(Unexpected)");;
+//				break;
+//			};
 			buf.append(" </LI>");
 			currentNode = currentNode.nextNode_;
 		} while (currentNode != firstNode_);
@@ -432,28 +466,30 @@ Write an XML representation of #receiver on the given #buf.
 
 		Node currentNode = firstNode_;
 		buf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<network>");
+		String[] text = {"<node>","</node>","<workstation>","</workstation>","<printer>","</printer>","<unknown></unknown>"};
 		do {
 			buf.append("\n\t");
-			switch (currentNode.type_) {
-			case Node.NODE:
-				buf.append("<node>");
-				buf.append(currentNode.name_);
-				buf.append("</node>");
-				break;
-			case Node.WORKSTATION:
-				buf.append("<workstation>");
-				buf.append(currentNode.name_);
-				buf.append("</workstation>");
-				break;
-			case Node.PRINTER:
-				buf.append("<printer>");
-				buf.append(currentNode.name_);
-				buf.append("</printer>");
-				break;
-			default:
-				buf.append("<unknown></unknown>");;
-				break;
-			};
+			writeBuf(currentNode,buf,text);
+//			switch (currentNode.type_) {
+//			case Node.NODE:
+//				buf.append("<node>");
+//				buf.append(currentNode.name_);
+//				buf.append("</node>");
+//				break;
+//			case Node.WORKSTATION:
+//				buf.append("<workstation>");
+//				buf.append(currentNode.name_);
+//				buf.append("</workstation>");
+//				break;
+//			case Node.PRINTER:
+//				buf.append("<printer>");
+//				buf.append(currentNode.name_);
+//				buf.append("</printer>");
+//				break;
+//			default:
+//				buf.append("<unknown></unknown>");;
+//				break;
+//			};
 			currentNode = currentNode.nextNode_;
 		} while (currentNode != firstNode_);
 		buf.append("\n</network>");
