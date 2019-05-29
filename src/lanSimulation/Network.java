@@ -151,6 +151,7 @@ A consistent token ring network
 		if (workstationsFound != workstations_.size()) {return false;}; //not all workstations are registered
 		//all verifications succeedeed
 		return true;}
+
 	
 	/**
 The #receiver is requested to broadcast a message to all nodes.
@@ -257,7 +258,7 @@ Therefore #receiver sends a packet across the token ring network, until either
 		};
 
 		if (packet.destination_.equals(currentNode.name_)) {
-			result = printDocument(currentNode, packet, report);
+			result = currentNode.printDocument(packet, report);
 		} else {
 			try {
 				report.write(">>> Destinition not found, print job cancelled.\n\n");
@@ -271,59 +272,8 @@ Therefore #receiver sends a packet across the token ring network, until either
 		return result;
 	}
 	
-	private boolean printDocument (Node printer, Packet document, Writer report) {
-		String author = "Unknown";
-		String title = "Untitled";
-		int startPos = 0, endPos = 0;
 
-		if (printer.type_ == Node.PRINTER) {
-			if (document.message_.startsWith("!PS")) {
-				startPos = document.message_.indexOf("author:");
-				if (startPos >= 0) {
-					endPos = document.message_.indexOf(".", startPos + 7);
-					if (endPos < 0) {endPos = document.message_.length();};
-					author = document.message_.substring(startPos + 7, endPos);};
-					startPos = document.message_.indexOf("title:");
-					if (startPos >= 0) {
-						endPos = document.message_.indexOf(".", startPos + 6);
-						if (endPos < 0) {endPos = document.message_.length();};
-						title = document.message_.substring(startPos + 6, endPos);};
-						accounting(author,title,report);
-						try {
-							report.write(">>> Postscript job delivered.\n\n");
-							report.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-			} else {
-				title = "ASCII DOCUMENT";
-				if (document.message_.length() >= 16) {
-					author = document.message_.substring(8, 16);};
-					accounting(author,title,report);
-					try {
-						report.write(">>> ASCII Print job delivered.\n\n");
-						report.flush();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-			};;
-			return true;
-		} else {
-			try {
-				report.write(">>> Destinition is not a printer, print job cancelled.\n\n");
-				report.flush();
-			} catch (IOException exc) {
-				// just ignore
-			};
-			return false;
-		}
-	}
-	
-	private void accounting(String author, String title, Writer report){
+	public static void accounting(String author, String title, Writer report){
 		try {
 			report.write("\tAccounting -- author = '");
 			report.write(author);
