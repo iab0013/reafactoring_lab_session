@@ -152,6 +152,25 @@ A consistent token ring network
 		//all verifications succeedeed
 		return true;}
 
+	private Node send(Node node, Writer writ, Packet packet, Boolean flag){
+		String cadena = "' accepts broadcase packet.\n";
+		String cadena2 = "' passes packet on.\n";
+		
+		do {
+			try {
+				if (flag == true){
+					node.logging(cadena,writ);
+				}
+				node.logging(cadena2,writ);
+				writ.flush();
+			} catch (IOException exc) {
+				// just ignore
+			};
+			node = node.nextNode_;
+		} while (! packet.atDestination(node)& (! packet.origin_.equals(node.name_)));
+		
+		return node;
+	}
 	
 	/**
 The #receiver is requested to broadcast a message to all nodes.
@@ -163,8 +182,6 @@ which should be treated by all nodes.
 	 */
 	public boolean requestBroadcast(Writer report) {
 		assert consistentNetwork();
-		String cadena = "' accepts broadcase packet.\n";
-		String cadena2 = "' passes packet on.\n";
 
 		try {
 			report.write("Broadcast Request\n");
@@ -174,23 +191,8 @@ which should be treated by all nodes.
 
 		Node currentNode = firstNode_;
 		Packet packet = new Packet("BROADCAST", firstNode_.name_, firstNode_.name_);
-		do {
-			try {
-				currentNode.logging(cadena,report);
-				currentNode.logging(cadena2,report);
-//				report.write("\tNode '");
-//				report.write(currentNode.name_);
-//				report.write("' accepts broadcase packet.\n");
-//				report.write("\tNode '");
-//				report.write(currentNode.name_);
-//				report.write("' passes packet on.\n");
-				report.flush();
-			} catch (IOException exc) {
-				// just ignore
-			};
-			currentNode = currentNode.nextNode_;
-		} while (! packet.atDestination(currentNode));
-
+		currentNode = send(currentNode,report,packet,true);
+		
 		try {
 			report.write(">>> Broadcast travelled whole token ring.\n\n");
 		} catch (IOException exc) {
@@ -213,7 +215,6 @@ Therefore #receiver sends a packet across the token ring network, until either
 	public boolean requestWorkstationPrintsDocument(String workstation, String document,
 			String printer, Writer report) {
 		assert consistentNetwork() & hasWorkstation(workstation);
-		String cadena = "' passes packet on.\n";
 
 		try {
 			report.write("'");
@@ -228,34 +229,11 @@ Therefore #receiver sends a packet across the token ring network, until either
 		};
 
 		boolean result = false;
-		Node startNode, currentNode;
+		Node currentNode;
 		Packet packet = new Packet(document, workstation, printer);
 
-		startNode = (Node) workstations_.get(workstation);
-
-		try {
-			startNode.logging(cadena,report);
-//			report.write("\tNode '");
-//			report.write(startNode.name_);
-//			report.write("' passes packet on.\n");
-			report.flush();
-		} catch (IOException exc) {
-			// just ignore
-		};
-		currentNode = startNode.nextNode_;
-		while ((! packet.atDestination(currentNode))
-				& (! packet.origin_.equals(currentNode.name_))) {
-			try {
-				currentNode.logging(cadena,report);
-//				report.write("\tNode '");
-//				report.write(currentNode.name_);
-//				report.write("' passes packet on.\n");
-				report.flush();
-			} catch (IOException exc) {
-				// just ignore
-			};
-			currentNode = currentNode.nextNode_;
-		};
+		currentNode = (Node) workstations_.get(workstation);
+		currentNode = send(currentNode,report,packet,false);
 
 		if (packet.atDestination(currentNode)) {
 			result = currentNode.printDocument(packet, report);
