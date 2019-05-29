@@ -141,5 +141,28 @@ Construct a <em>Node</em> with given #type and #name, and which is linked to #ne
 			return false;
 		}
 	}
+	
+	public void writeBuf(StringBuffer buf, String[] text){
+		switch (this.type_) {
+		case Node.NODE:
+			buf.append(text[0]);
+			buf.append(this.name_);
+			buf.append(text[1]);
+			break;
+		case Node.WORKSTATION:
+			buf.append(text[2]);
+			buf.append(this.name_);
+			buf.append(text[3]);
+			break;
+		case Node.PRINTER:
+			buf.append(text[4]);
+			buf.append(this.name_);
+			buf.append(text[5]);
+			break;
+		default:
+			buf.append(text[6]);;
+			break;
+		};
+	}
 
 }

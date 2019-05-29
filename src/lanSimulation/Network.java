@@ -275,28 +275,6 @@ Return a printable representation of #receiver.
 		return buf.toString();
 	}
 
-	private void writeBuf(Node node, StringBuffer buf, String[] text){
-		switch (node.type_) {
-		case Node.NODE:
-			buf.append(text[0]);
-			buf.append(node.name_);
-			buf.append(text[1]);
-			break;
-		case Node.WORKSTATION:
-			buf.append(text[2]);
-			buf.append(node.name_);
-			buf.append(text[3]);
-			break;
-		case Node.PRINTER:
-			buf.append(text[4]);
-			buf.append(node.name_);
-			buf.append(text[5]);
-			break;
-		default:
-			buf.append(text[6]);;
-			break;
-		};
-	}
 	
 	/**
 Write a printable representation of #receiver on the given #buf.
@@ -307,27 +285,7 @@ Write a printable representation of #receiver on the given #buf.
 		Node currentNode = firstNode_;
 		String[] text = {"Node "," [Node]","Workstation "," [Workstation]","Printer "," [Printer]","(Unexpected)"};
 		do {
-			writeBuf(currentNode,buf,text);
-//			switch (currentNode.type_) {
-//			case Node.NODE:
-//				buf.append("Node ");
-//				buf.append(currentNode.name_);
-//				buf.append(" [Node]");
-//				break;
-//			case Node.WORKSTATION:
-//				buf.append("Workstation ");
-//				buf.append(currentNode.name_);
-//				buf.append(" [Workstation]");
-//				break;
-//			case Node.PRINTER:
-//				buf.append("Printer ");
-//				buf.append(currentNode.name_);
-//				buf.append(" [Printer]");
-//				break;
-//			default:
-//				buf.append("(Unexpected)");;
-//				break;
-//			};
+			currentNode.writeBuf(buf,text);
 			buf.append(" -> ");
 			currentNode = currentNode.nextNode_;
 		} while (currentNode != firstNode_);
@@ -347,27 +305,7 @@ Write a HTML representation of #receiver on the given #buf.
 		String[] text = {"Node "," [Node]","Workstation "," [Workstation]","Printer "," [Printer]","(Unexpected)"};
 		do {
 			buf.append("\n\t<LI> ");
-			writeBuf(currentNode,buf,text);
-//			switch (currentNode.type_) {
-//			case Node.NODE:
-//				buf.append("Node ");
-//				buf.append(currentNode.name_);
-//				buf.append(" [Node]");
-//				break;
-//			case Node.WORKSTATION:
-//				buf.append("Workstation ");
-//				buf.append(currentNode.name_);
-//				buf.append(" [Workstation]");
-//				break;
-//			case Node.PRINTER:
-//				buf.append("Printer ");
-//				buf.append(currentNode.name_);
-//				buf.append(" [Printer]");
-//				break;
-//			default:
-//				buf.append("(Unexpected)");;
-//				break;
-//			};
+			currentNode.writeBuf(buf,text);
 			buf.append(" </LI>");
 			currentNode = currentNode.nextNode_;
 		} while (currentNode != firstNode_);
@@ -386,27 +324,7 @@ Write an XML representation of #receiver on the given #buf.
 		String[] text = {"<node>","</node>","<workstation>","</workstation>","<printer>","</printer>","<unknown></unknown>"};
 		do {
 			buf.append("\n\t");
-			writeBuf(currentNode,buf,text);
-//			switch (currentNode.type_) {
-//			case Node.NODE:
-//				buf.append("<node>");
-//				buf.append(currentNode.name_);
-//				buf.append("</node>");
-//				break;
-//			case Node.WORKSTATION:
-//				buf.append("<workstation>");
-//				buf.append(currentNode.name_);
-//				buf.append("</workstation>");
-//				break;
-//			case Node.PRINTER:
-//				buf.append("<printer>");
-//				buf.append(currentNode.name_);
-//				buf.append("</printer>");
-//				break;
-//			default:
-//				buf.append("<unknown></unknown>");;
-//				break;
-//			};
+			currentNode.writeBuf(buf,text);
 			currentNode = currentNode.nextNode_;
 		} while (currentNode != firstNode_);
 		buf.append("\n</network>");
